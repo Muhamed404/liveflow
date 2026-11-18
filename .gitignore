@@ -1,0 +1,23 @@
+# secrets: ENCRYPTION_KEY and the first admin password
+.env
+.env.*
+!.env.example
+
+# runtime data (SQLite with encrypted tokens and user accounts)
+*.db
+*.db-wal
+*.db-shm
+data/
+
+# dependencies and build output
+node_modules/
+dist/
+
+# browser test output
+frontend/e2e/*.png
+test-results/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/

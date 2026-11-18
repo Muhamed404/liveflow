@@ -1,0 +1,1 @@
+{"metric":"rps","step_sec":15,"points":[[1,0.1],[2,null],[3,0.3]],"markers":[{"at":"2026-10-21T10:08:25.376Z","kind":"deploy","label":"deploy abc1234"}]}

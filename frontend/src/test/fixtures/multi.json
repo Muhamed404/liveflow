@@ -1,0 +1,527 @@
+{
+  "app": {
+    "id": "shop",
+    "name": "Shop"
+  },
+  "env": {
+    "name": "staging",
+    "runtime": "k8s",
+    "deploy_mode": "auto",
+    "git_branch": null
+  },
+  "grafana_url": null,
+  "features": {
+    "release": false,
+    "build": false,
+    "sync": false,
+    "stress": false,
+    "logs": false
+  },
+  "workload": {
+    "data": {
+      "runtime": "k8s",
+      "version": "stg-abc1234",
+      "image": "registry/frontend:stg-abc1234",
+      "versions": [
+        "stg-abc1234"
+      ],
+      "replicas": {
+        "desired": 9,
+        "ready": 9,
+        "updated": 9,
+        "on_current_version": 9
+      },
+      "rolling_out": false,
+      "hpa": {
+        "name": "frontend-hpa",
+        "target": "frontend",
+        "min_replicas": 2,
+        "max_replicas": 5,
+        "current_replicas": 3,
+        "desired_replicas": 3,
+        "cpu_target_percent": 70,
+        "cpu_current_percent": 64,
+        "last_scale_time": null
+      },
+      "instances": [
+        {
+          "name": "frontend-7d9f-a",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 1,
+          "image": "registry/frontend:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "frontend",
+          "current": true
+        },
+        {
+          "name": "frontend-7d9f-b",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 1,
+          "image": "registry/frontend:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "frontend",
+          "current": true
+        },
+        {
+          "name": "frontend-7d9f-c",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 1,
+          "image": "registry/frontend:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "frontend",
+          "current": true
+        },
+        {
+          "name": "catalog-5c8b-x",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/catalog:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "catalog",
+          "current": true
+        },
+        {
+          "name": "catalog-5c8b-y",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/catalog:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-2",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "catalog",
+          "current": true
+        },
+        {
+          "name": "cart-5c8b-x",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/cart:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "cart",
+          "current": true
+        },
+        {
+          "name": "cart-5c8b-y",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/cart:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-2",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "cart",
+          "current": true
+        },
+        {
+          "name": "orders-5c8b-x",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/orders:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "orders",
+          "current": true
+        },
+        {
+          "name": "checkout-5c8b-x",
+          "phase": "Running",
+          "ready": true,
+          "restarts": 0,
+          "image": "registry/checkout:stg-abc1234",
+          "version": "stg-abc1234",
+          "node": "node-1",
+          "started_at": "2026-10-20T10:00:00Z",
+          "service": "checkout",
+          "current": true
+        }
+      ],
+      "services": [
+        {
+          "name": "frontend",
+          "version": "stg-abc1234",
+          "image": "registry/frontend:stg-abc1234",
+          "replicas": {
+            "desired": 3,
+            "ready": 3,
+            "updated": 3,
+            "on_current_version": 3
+          },
+          "rolling_out": false,
+          "hpa": {
+            "name": "frontend-hpa",
+            "target": "frontend",
+            "min_replicas": 2,
+            "max_replicas": 5,
+            "current_replicas": 3,
+            "desired_replicas": 3,
+            "cpu_target_percent": 70,
+            "cpu_current_percent": 64,
+            "last_scale_time": null
+          },
+          "instances": [
+            {
+              "name": "frontend-7d9f-a",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 1,
+              "image": "registry/frontend:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "frontend",
+              "current": true
+            },
+            {
+              "name": "frontend-7d9f-b",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 1,
+              "image": "registry/frontend:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "frontend",
+              "current": true
+            },
+            {
+              "name": "frontend-7d9f-c",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 1,
+              "image": "registry/frontend:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "frontend",
+              "current": true
+            }
+          ]
+        },
+        {
+          "name": "catalog",
+          "version": "stg-abc1234",
+          "image": "registry/catalog:stg-abc1234",
+          "replicas": {
+            "desired": 2,
+            "ready": 2,
+            "updated": 2,
+            "on_current_version": 2
+          },
+          "rolling_out": false,
+          "hpa": null,
+          "instances": [
+            {
+              "name": "catalog-5c8b-x",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/catalog:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "catalog",
+              "current": true
+            },
+            {
+              "name": "catalog-5c8b-y",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/catalog:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-2",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "catalog",
+              "current": true
+            }
+          ]
+        },
+        {
+          "name": "cart",
+          "version": "stg-abc1234",
+          "image": "registry/cart:stg-abc1234",
+          "replicas": {
+            "desired": 2,
+            "ready": 2,
+            "updated": 2,
+            "on_current_version": 2
+          },
+          "rolling_out": false,
+          "hpa": {
+            "name": "cart-hpa",
+            "target": "cart",
+            "min_replicas": 1,
+            "max_replicas": 4,
+            "current_replicas": 2,
+            "desired_replicas": 2,
+            "cpu_target_percent": 70,
+            "cpu_current_percent": 48,
+            "last_scale_time": null
+          },
+          "instances": [
+            {
+              "name": "cart-5c8b-x",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/cart:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "cart",
+              "current": true
+            },
+            {
+              "name": "cart-5c8b-y",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/cart:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-2",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "cart",
+              "current": true
+            }
+          ]
+        },
+        {
+          "name": "orders",
+          "version": "stg-abc1234",
+          "image": "registry/orders:stg-abc1234",
+          "replicas": {
+            "desired": 1,
+            "ready": 1,
+            "updated": 1,
+            "on_current_version": 1
+          },
+          "rolling_out": false,
+          "hpa": null,
+          "instances": [
+            {
+              "name": "orders-5c8b-x",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/orders:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "orders",
+              "current": true
+            }
+          ]
+        },
+        {
+          "name": "checkout",
+          "version": "stg-abc1234",
+          "image": "registry/checkout:stg-abc1234",
+          "replicas": {
+            "desired": 1,
+            "ready": 1,
+            "updated": 1,
+            "on_current_version": 1
+          },
+          "rolling_out": false,
+          "hpa": null,
+          "instances": [
+            {
+              "name": "checkout-5c8b-x",
+              "phase": "Running",
+              "ready": true,
+              "restarts": 0,
+              "image": "registry/checkout:stg-abc1234",
+              "version": "stg-abc1234",
+              "node": "node-1",
+              "started_at": "2026-10-20T10:00:00Z",
+              "service": "checkout",
+              "current": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "data": {
+      "cpu_cores": 0.42,
+      "memory_bytes": 0.42,
+      "rps": 0.42,
+      "error_rate": 0.42
+    }
+  },
+  "pipeline": {
+    "data": null
+  },
+  "argocd": {
+    "data": null
+  },
+  "path": {
+    "phase": "idle",
+    "stations": [
+      {
+        "id": "github",
+        "name": "GitHub",
+        "state": "idle",
+        "status": "No runs yet",
+        "detail": null
+      },
+      {
+        "id": "jenkins",
+        "name": "Jenkins",
+        "state": "idle",
+        "status": "No runs yet",
+        "detail": null,
+        "build_number": null,
+        "stages": null,
+        "current_stage": null,
+        "image": null
+      },
+      {
+        "rolling_out": false,
+        "id": "cluster",
+        "name": "Cluster",
+        "state": "done",
+        "status": "stg-abc1234 · 9 / 9",
+        "detail": "cluster-stg · 5 services",
+        "instances": [
+          {
+            "name": "frontend-7d9f-a",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "frontend"
+          },
+          {
+            "name": "frontend-7d9f-b",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "frontend"
+          },
+          {
+            "name": "frontend-7d9f-c",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "frontend"
+          },
+          {
+            "name": "catalog-5c8b-x",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "catalog"
+          },
+          {
+            "name": "catalog-5c8b-y",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "catalog"
+          },
+          {
+            "name": "cart-5c8b-x",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "cart"
+          },
+          {
+            "name": "cart-5c8b-y",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "cart"
+          },
+          {
+            "name": "orders-5c8b-x",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "orders"
+          },
+          {
+            "name": "checkout-5c8b-x",
+            "look": "new",
+            "version": "stg-abc1234",
+            "service": "checkout"
+          }
+        ],
+        "version": "stg-abc1234",
+        "services": [
+          {
+            "name": "frontend",
+            "version": "stg-abc1234",
+            "ready": 3,
+            "desired": 3,
+            "rolling_out": false
+          },
+          {
+            "name": "catalog",
+            "version": "stg-abc1234",
+            "ready": 2,
+            "desired": 2,
+            "rolling_out": false
+          },
+          {
+            "name": "cart",
+            "version": "stg-abc1234",
+            "ready": 2,
+            "desired": 2,
+            "rolling_out": false
+          },
+          {
+            "name": "orders",
+            "version": "stg-abc1234",
+            "ready": 1,
+            "desired": 1,
+            "rolling_out": false
+          },
+          {
+            "name": "checkout",
+            "version": "stg-abc1234",
+            "ready": 1,
+            "desired": 1,
+            "rolling_out": false
+          }
+        ]
+      }
+    ],
+    "rails": [
+      "idle",
+      "done"
+    ]
+  },
+  "gate": null,
+  "can": {
+    "run_pipeline": {
+      "allowed": false,
+      "reason": "not available for this environment"
+    },
+    "release": {
+      "allowed": false,
+      "reason": "releases are for prod"
+    },
+    "sync": {
+      "allowed": false,
+      "reason": "not deployed by ArgoCD"
+    },
+    "stress": {
+      "allowed": false,
+      "reason": "no stress job configured"
+    }
+  },
+  "stress": null,
+  "role": "admin"
+}
