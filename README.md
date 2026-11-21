@@ -2,7 +2,7 @@
 
 **One screen for your whole delivery path.** See what Jenkins is building, what ArgoCD will deploy and what runs in each environment — and open the production gate when you are ready.
 
-![The Flow page](docs/images/flow-page.png)
+![The Flow page](https://raw.githubusercontent.com/wiki/Muhamed404/liveflow/images/flow-page.png)
 
 - **Watch:** GitHub → Jenkins → ArgoCD → Kubernetes (or Docker Compose) as one live path, with pods per service, metrics, logs and one timeline of who did what.
 - **Act:** run pipelines, create versioned releases, roll back, run k6 load tests.
@@ -26,22 +26,24 @@ cp backend/.env.example .env      # set ENCRYPTION_KEY (openssl rand -base64 32)
 docker compose up -d --build      # http://<server>:4000
 ```
 
-Then follow **[First setup, step by step](docs/03-first-setup.md)**.
+Then follow **[First setup, step by step](https://github.com/Muhamed404/liveflow/wiki/First-Setup)**.
 
 ## Guide
 
+The full guide is in the **[wiki](https://github.com/Muhamed404/liveflow/wiki)**.
+
 | | |
 |---|---|
-| [How Liveflow works](docs/01-how-liveflow-works.md) | the idea, the words it uses, the safety rules |
-| [Install and run](docs/02-install.md) | server, `.env`, HTTPS, users, upgrade, backup |
-| [First setup, step by step](docs/03-first-setup.md) | from an empty Liveflow to a green delivery path |
-| [Connect each tool](docs/04-integrations.md) | exact token, permission and URL for GitHub, Jenkins, ArgoCD, Kubernetes, Prometheus, Loki, Grafana |
-| [Environments](docs/05-environments.md) | every field, several services per environment, the rules |
-| [Using it every day](docs/06-daily-use.md) | deploy, release, the gate, rollback, stress tests |
-| [What your Jenkinsfiles must do](docs/07-jenkins-contract.md) | parameters, stages, image tags |
-| [Troubleshooting](docs/08-troubleshooting.md) | every common error and its fix |
-| [Full example: retail-store](docs/09-example-retail-store.md) | a complete real configuration |
-| [API reference](docs/api-reference.md) | for people who build on the API |
+| [How Liveflow works](https://github.com/Muhamed404/liveflow/wiki/How-Liveflow-Works) | the idea, the words it uses, the safety rules |
+| [Install and run](https://github.com/Muhamed404/liveflow/wiki/Install-and-Run) | server, `.env`, HTTPS, users, upgrade, backup |
+| [First setup, step by step](https://github.com/Muhamed404/liveflow/wiki/First-Setup) | from an empty Liveflow to a green delivery path |
+| [Connect each tool](https://github.com/Muhamed404/liveflow/wiki/Connect-Each-Tool) | exact token, permission and URL for GitHub, Jenkins, ArgoCD, Kubernetes, Prometheus, Loki, Grafana |
+| [Environments](https://github.com/Muhamed404/liveflow/wiki/Environments) | every field, several services per environment, the rules |
+| [Using it every day](https://github.com/Muhamed404/liveflow/wiki/Daily-Use) | deploy, release, the gate, rollback, stress tests |
+| [What your Jenkinsfiles must do](https://github.com/Muhamed404/liveflow/wiki/Jenkins-Contract) | parameters, stages, image tags |
+| [Troubleshooting](https://github.com/Muhamed404/liveflow/wiki/Troubleshooting) | every common error and its fix |
+| [Full example: retail-store](https://github.com/Muhamed404/liveflow/wiki/Example-Retail-Store) | a complete real configuration |
+| [API reference](https://github.com/Muhamed404/liveflow/wiki/API-Reference) | for people who build on the API |
 
 Infrastructure checklist: **[REQUIREMENTS.md](REQUIREMENTS.md)** · Full project handoff: **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)**
 
