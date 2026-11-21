@@ -146,7 +146,7 @@ r = await call('POST', `${SH}/test`, {});
 expect('a missing deployment fails the test and is named', r.body.checks.some((c) => c.tool === 'kubernetes' && !c.ok && /payments/.test(c.message)), r.body.checks);
 const { buildQueries } = await import('../src/adapters/queries.js');
 const q = buildQueries({ k8s: { namespace: 'shop', deployment: 'ui', deployments: ['ui', 'cart'] } });
-expect('metrics cover every service: pod=~"(ui|cart)-.*"', q.cpu_cores.includes('pod=~"(ui|cart)-.*"'), q.cpu_cores);
+expect('metrics cover every service: pod=~"(ui|cart)-[a-z0-9]{1,10}-[a-z0-9]{5}"', q.cpu_cores.includes('pod=~"(ui|cart)-[a-z0-9]{1,10}-[a-z0-9]{5}"'), q.cpu_cores);
 o = (await call('GET', `${S}/overview`)).body;
 expect('single-deployment env keeps its old shape', o.workload.data.services.length === 1 && !/services$/.test(station(o, 'cluster').detail), station(o, 'cluster'));
 

@@ -50,6 +50,7 @@ const o = r.body;
 expect('overview: workload live from cluster', o.workload.data?.replicas.desired === 3 && o.workload.data.hpa.max_replicas === 5 && o.workload.data.instances.length === 3, o);
 expect('overview: metrics snapshot', o.metrics.data?.cpu_cores === 0.42 && 'rps' in o.metrics.data, o.metrics);
 expect('overview: partial failure isolated (bad argocd token)', o.argocd.error?.includes('authentication failed') && o.workload.data, o.argocd);
+expect('overview: no blind sync while ArgoCD is unavailable', o.can.sync.allowed === false && o.can.sync.reason.includes('unavailable'), o.can.sync);
 expect('overview: pipeline empty before first build', o.pipeline.data === null, o.pipeline);
 expect('overview: feature flags', o.features.stress && o.features.build && !o.features.release, o.features);
 
@@ -99,11 +100,17 @@ mock.state.finish('frontend-prod');
 
 r = await call('POST', `${P}/rollback`, { version: 'v9.9.9', confirm: true });
 expect('rollback to unknown tag -> 404', r.status === 404, r);
+const stagingRuns = mock.state.ci.jobs['frontend-staging-ci'].length;
+r = await call('POST', `${S}/rollback`, { version: 'v2.1.0' });
+expect('rollback is prod-only (staging branch pipeline is not re-run)', r.status === 400 && mock.state.ci.jobs['frontend-staging-ci'].length === stagingRuns, r);
 r = await call('POST', `${P}/rollback`, { version: 'v2.1.0', confirm: true });
 expect('rollback triggers jenkins with ACTION=rollback', r.status === 202 && lastCi('frontend-prod').params.ACTION === 'rollback', r);
 
 r = await call('POST', `${P}/sync`, {});
 expect('prod sync without confirm -> 428', r.status === 428, r);
+r = await call('POST', `${P}/sync`, { confirm: true });
+expect('prod sync refused while the prod job still runs (it may be writing the tag)', r.status === 409 && mock.state.syncs === 0 && r.body.error.includes('wait for'), r);
+mock.state.finish('frontend-prod');
 r = await call('POST', `${P}/sync`, { confirm: true });
 expect('prod sync calls argocd', r.status === 200 && mock.state.syncs === 1 && r.body.sync_status, r);
 
@@ -135,6 +142,12 @@ expect('actor recorded', r.body.find((a) => a.details?.version === 'v2.3.0').act
 expect('sync activity summarized', Object.keys(r.body.find((a) => a.action === 'sync').details.result).length === 3);
 r = await call('GET', '/activity');
 expect('global activity feed', r.body.length >= 8, r.body.length);
+
+// prod is always manual: an "auto" prod would sync itself and the gate would never appear
+r = await call('PUT', P, { deploy_mode: 'auto' });
+expect('prod cannot be set to auto deploy', r.status === 400 && r.body.details?.some((d) => d.path[0] === 'deploy_mode'), r);
+r = await call('GET', P);
+expect('prod stays manual', r.body.deploy_mode === 'manual', r.body);
 
 // env CRUD still works with the actions router mounted
 r = await call('GET', S);

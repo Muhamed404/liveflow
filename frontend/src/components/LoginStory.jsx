@@ -29,7 +29,7 @@ function Preview() {
   return (
     <figure className="lp" aria-hidden="true">
       <div className="lp__head">
-        <span className="lp__app">frontend-app</span>
+        <span className="lp__app">retail-store</span>
         <span className="lp__env">prod</span>
         <span className="lp__status"><span className="lp__pulse" />v2.3.0 is live</span>
       </div>

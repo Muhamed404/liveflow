@@ -100,7 +100,7 @@ Job names must match what you enter in Settings → environment → `Jenkins job
 - [ ] **[required]** K8s: scrapes kubelet / cAdvisor → `container_cpu_usage_seconds_total`, `container_memory_working_set_bytes` with `namespace`, `pod`, `container` labels
 - [ ] **[required]** Dev: **cAdvisor running on the dev server**, scraped by the Prometheus set on the dev env. Needs the Docker Compose labels:
   `container_label_com_docker_compose_project`, `container_label_com_docker_compose_service`, plus `container_last_seen`
-- [ ] **[required]** Pods are named `<deployment>-...` (default for Deployments) — CPU/memory queries match `pod=~"(<dep1>|<dep2>|...)-.*"`
+- [ ] **[required]** Pods are named the Kubernetes default for Deployments, `<deployment>-<hash>-<id>` — CPU/memory queries match exactly that shape (`pod=~"(<dep1>|<dep2>|...)-[a-z0-9]{1,10}-[a-z0-9]{5}"`), so a same-prefix database pod such as `catalog-db-0` is **not** counted
 - [ ] **[optional]** Auth: none, basic (set username + token) or bearer (token only)
 - [ ] **[optional]** Multi-tenant (Mimir / Cortex): set **Tenant** on the integration → sent as `X-Scope-OrgID`
 
@@ -164,6 +164,7 @@ Job names must match what you enter in Settings → environment → `Jenkins job
 | 2026-10-20 | 0.1.0 | Initial: clusters, integrations, apps, environments; tokens AES-256-GCM encrypted |
 | 2026-10-20 | 0.2.0 | Dev reads containers via **cAdvisor + Prometheus** (Docker integration removed). Adapters for Jenkins, K8s, ArgoCD, GitHub, Prometheus, Loki, Grafana |
 | 2026-10-20 | 0.3.0 | Prod job params `VERSION`, `ACTION`; k6 job params `TARGET_URL`, `VUS`, `DURATION`; prod job must have **no** tag webhook; Jenkins user needs `Job/Cancel` |
+| 2026-11-21 | 0.5.5 | **No new infra requirements.** Prod environments are always manual sync (auto is rejected). Sync is refused while the env's Jenkins job runs. Rollback is prod-only. Pod / event matching uses the exact Deployment pod shape `<deployment>-<hash>-<id>` (databases with the same prefix are ignored) |
 | 2026-11-18 | 0.5.4 | An environment can list **several Kubernetes deployments** (comma separated, same namespace). **No new infra requirements**: same RBAC (`get` on each deployment, `list` pods / HPAs / events). Each deployment needs its own selector labels and `<name>-...` pod names |
 | 2026-10-27 | 0.5.3 | Renamed **Showcase → Liveflow**. Suggested Jenkins user and ArgoCD account are now `liveflow` (`argocd account generate-token --account liveflow`); use any name you like. Docker volume is now `liveflow-data` (new empty volume: the first start creates the admin from `ADMIN_PASSWORD` again) |
 | 2026-10-25 | 0.5.2 | No new infra requirements. Reminder: a **Docker Compose env needs a Prometheus integration** that scrapes cAdvisor on the dev server. Settings errors now name and mark the field |

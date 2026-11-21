@@ -19,11 +19,11 @@ export function requireProdConfirm(ctx, body) {
 }
 
 // Two interviewers clicking at once must not start two pipelines
-async function ensureNoRunningBuild(ctx) {
+async function ensureNoRunningBuild(ctx, message = (b) => `pipeline #${b.number} is already running`) {
   bust(ctx);
   const last = await getLatestBuild(ctx);
   if (last?.status === 'RUNNING') {
-    throw new HttpError(409, `pipeline #${last.number} is already running`, { build_number: last.number });
+    throw new HttpError(409, message(last), { build_number: last.number });
   }
 }
 
@@ -108,6 +108,8 @@ export async function createRelease(ctx, { version, notes }) {
 
 /** Redeploy an existing tag. Jenkins skips the build when the image already exists. */
 export async function rollback(ctx, { version }) {
+  // dev/staging run branch pipelines that ignore VERSION/ACTION: a "rollback" there would just rebuild the branch
+  if (ctx.env.name !== 'prod') throw new HttpError(400, 'rollback is for prod; dev/staging deploy from their branches (revert the commit instead)');
   needJenkins(ctx);
   if (!isSemverTag(version)) throw new HttpError(400, 'version must look like v1.2.3');
   if (!ctx.github || !(await github.tagExists(ctx.github, ctx.github.repo, version))) {
@@ -122,6 +124,8 @@ export async function rollback(ctx, { version }) {
 /** ArgoCD sync — the manual production gate (also works as "force sync" on staging) */
 export async function sync(ctx) {
   if (!ctx.argocd) throw new HttpError(400, 'this environment is not deployed by ArgoCD');
+  // same rule as the button (overview.can.sync): while Jenkins runs it may still be writing the new tag to git
+  await ensureNoRunningBuild(ctx, (b) => `wait for #${b.number}: Jenkins is still running`);
   await argocd.sync(ctx.argocd, ctx.argocd.app);
   bust(ctx);
   return argocd.getApp(ctx.argocd, ctx.argocd.app);

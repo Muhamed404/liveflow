@@ -67,8 +67,8 @@ function argoStation(ctx, argo, error, upstreamBusy) {
   // downstream of a running build: real status kept in sync_status, but the station waits its turn
   if (upstreamBusy) return { ...st, state: 'idle', status: 'Waits for Jenkins', detail: `now: ${argo.sync_status}` };
   if (argo.sync_status === 'OutOfSync') {
-    if (ctx.env.deploy_mode === 'manual' && !upstreamBusy) return { ...st, state: 'gate', status: 'Waiting for approval', detail: 'OutOfSync · manual' };
-    return { ...st, state: upstreamBusy ? 'idle' : 'active', status: 'OutOfSync' };
+    if (ctx.env.deploy_mode === 'manual') return { ...st, state: 'gate', status: 'Waiting for approval', detail: 'OutOfSync · manual' };
+    return { ...st, state: 'active', status: 'OutOfSync' };
   }
   if (argo.health_status === 'Degraded' || argo.health_status === 'Missing') return { ...st, state: 'fail', status: argo.health_status };
   if (argo.health_status === 'Progressing') return { ...st, state: 'active', status: 'Synced · progressing' };
@@ -98,12 +98,21 @@ function workloadStation(ctx, w, error) {
   st.version = w.version;
   // one line per service (the UI groups the pod squares by it when there is more than one)
   st.services = (w.services || []).map((s) => ({
-    name: s.name, version: s.version, ready: s.replicas.ready, desired: s.replicas.desired, rolling_out: s.rolling_out,
+    name: s.name, version: s.version, ready: s.replicas.ready, desired: s.replicas.desired,
+    on_new: s.replicas.on_current_version, rolling_out: s.rolling_out,
   }));
   if (st.services.length > 1 && !error) st.detail = `${st.detail} · ${st.services.length} services`;
   const { desired, ready, on_current_version: onNew } = w.replicas;
   const rolling = (w.services || []).filter((s) => s.rolling_out);
-  if (w.rolling_out) {
+  // a service with 0 desired replicas serves nothing: never "done" (0 / 0 used to look healthy)
+  const atZero = (w.services || []).filter((s) => s.replicas.desired === 0);
+  if (desired === 0 || (atZero.length && atZero.length === (w.services || []).length)) {
+    st.state = 'fail';
+    st.status = isK8s ? 'Scaled to 0' : 'No containers running';
+  } else if (atZero.length) {
+    st.state = 'fail';
+    st.status = `${atZero.map((s) => s.name).join(', ')} scaled to 0`;
+  } else if (w.rolling_out) {
     st.rolling_out = true;
     st.state = 'active';
     // name the service when it is the only one rolling: "Rolling out cart 1 / 3"
@@ -111,7 +120,7 @@ function workloadStation(ctx, w, error) {
       ? `Rolling out ${rolling[0].name} ${rolling[0].replicas.on_current_version} / ${rolling[0].replicas.desired}`
       : `Rolling out ${onNew} / ${desired}`;
   } else if (ready < desired) {
-    st.state = desired === 0 ? 'fail' : 'active';
+    st.state = 'active';
     st.status = `${ready} / ${desired} ready`;
   } else {
     st.state = 'done';

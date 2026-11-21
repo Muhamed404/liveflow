@@ -14,6 +14,15 @@ export function headline(o) {
       return { title: 'ArgoCD is syncing', sub: 'Kubernetes is applying the new manifests.' };
     case 'rolling_out':
       {
+        // several services: talk about the ones actually rolling, not the primary's version and every pod in the env
+        const rolling = (w.services || []).filter((s) => s.rolling_out);
+        if ((w.services || []).length > 1 && rolling.length === 1) {
+          const r = rolling[0];
+          return { title: `${r.name} ${r.version || ''} is rolling out`.replace(/\s+is/, ' is'), sub: `${r.on_new} of ${r.desired} ${r.name} pods are on the new image. Old pods leave as new ones get ready.` };
+        }
+        if (rolling.length > 1) {
+          return { title: `${rolling.length} services are rolling out`, sub: `${rolling.map((s) => `${s.name} ${s.on_new} / ${s.desired}`).join(' · ')}. Old pods leave as new ones get ready.` };
+        }
         const total = w.instances.length, onNew = w.instances.filter((p) => p.look === 'new').length;
         return { title: `${w.version || 'New version'} is rolling out`, sub: `${onNew} of ${total} pods are on the new image. Old pods leave as new ones get ready.` };
       }

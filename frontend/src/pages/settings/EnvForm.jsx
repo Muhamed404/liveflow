@@ -74,8 +74,11 @@ export function EnvForm({ app, env, integrations, clusters, readOnly }) {
           <Segmented label="Runtime" value={form.runtime} onChange={readOnly ? () => {} : set('runtime')}
             options={[{ value: 'compose', label: 'Docker Compose' }, { value: 'k8s', label: 'Kubernetes' }]} /></div>
         {k8s && <div className="field"><span className="field__label">Deploys</span>
-          <Segmented label="Deploy mode" value={form.deploy_mode} onChange={readOnly ? () => {} : set('deploy_mode')}
-            options={[{ value: 'auto', label: 'Auto-sync' }, { value: 'manual', label: 'Manual sync (gate)' }]} /></div>}
+          {env === 'prod'
+            // prod is always behind the gate (the server rejects "auto" for prod)
+            ? <span className="hint">Manual sync (gate) — always, for production</span>
+            : <Segmented label="Deploy mode" value={form.deploy_mode} onChange={readOnly ? () => {} : set('deploy_mode')}
+              options={[{ value: 'auto', label: 'Auto-sync' }, { value: 'manual', label: 'Manual sync (gate)' }]} />}</div>}
       </div>
 
       {k8s ? (

@@ -5,13 +5,18 @@
  * Label values come from validated names (DNS-1123 / compose names), so they are safe to interpolate.
  * HTTP metrics (rps / error rate): metric + status label are configurable per env (default http_requests_total / status).
  */
+// what Kubernetes appends to a Deployment's pods: -<pod-template-hash>-<5 random chars>
+export const DEPLOYMENT_POD_SUFFIX = '-[a-z0-9]{1,10}-[a-z0-9]{5}';
+
 export function buildQueries(ctx) {
   let workload;
   if (ctx.k8s) {
-    // every deployment of the environment: pod=~"(ui|catalog|cart)-.*" (names are DNS-1123, so regex-safe)
+    // only the Deployments' own pods: <deployment>-<pod-template-hash>-<5 chars>, e.g. catalog-7d9f8c6b5-x2k4q.
+    // A plain "catalog-.*" prefix also caught catalog-db-0 (the database) and counted its CPU as the app's.
+    // Names are DNS-1123, so they are regex-safe.
     const deps = ctx.k8s.deployments || [ctx.k8s.deployment];
-    const pods = deps.length > 1 ? `(${deps.join('|')})` : deps[0];
-    workload = `namespace="${ctx.k8s.namespace}",pod=~"${pods}-.*",container!="",container!="POD"`;
+    const names = deps.length > 1 ? `(${deps.join('|')})` : deps[0];
+    workload = `namespace="${ctx.k8s.namespace}",pod=~"${names}${DEPLOYMENT_POD_SUFFIX}",container!="",container!="POD"`;
   } else {
     workload = `container_label_com_docker_compose_project="${ctx.compose.project}"`;
   }

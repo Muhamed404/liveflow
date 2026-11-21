@@ -68,6 +68,9 @@ a:hover { color: #9CC3FF; }
 .envtab--dev .envdot { background: var(--blue); } .envtab--staging .envdot { background: var(--orange); } .envtab--prod .envdot { background: var(--red); }
 .envtab[aria-current="true"] { color: var(--text); background: color-mix(in srgb, var(--tone) 14%, transparent); border-color: color-mix(in srgb, var(--tone) 55%, transparent); }
 .contextbar__chips { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; }
+.appswitch { display: flex; align-items: center; gap: 8px; }
+.appswitch__label { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.appswitch__name { display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border-radius: var(--r-sm); background: var(--raised); border: 1px solid var(--border); font-weight: 600; }
 
 .page { max-width: 1376px; margin: 0 auto; padding: 24px 32px 56px; display: flex; flex-direction: column; gap: 20px; }
 

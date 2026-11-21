@@ -8,13 +8,15 @@ export async function cached(key, ttlMs, fn) {
   if (hit && (hit.pending || hit.expires > now)) return hit.pending || hit.value;
 
   const pending = Promise.resolve().then(fn);
-  store.set(key, { pending });
+  const entry = { pending };
+  store.set(key, entry);
   try {
     const value = await pending;
-    store.set(key, { value, expires: Date.now() + ttlMs });
+    // invalidate() may have run while we waited (e.g. right after a sync): don't put the old answer back
+    if (store.get(key) === entry) store.set(key, { value, expires: Date.now() + ttlMs });
     return value;
   } catch (err) {
-    store.delete(key);
+    if (store.get(key) === entry) store.delete(key);
     throw err;
   }
 }

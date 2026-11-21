@@ -203,7 +203,8 @@ export async function getOverview(ctx) {
       : running ? no(`#${build.number} is running — one pipeline per environment`) : yes,
     release: !out.features.release ? no('releases are for prod') : running ? no(`#${build.number} is running`) : yes,
     sync: !ctx.argocd ? no('not deployed by ArgoCD') : running ? no(`wait for #${build.number}`)
-      : argo && argo.sync_status === 'Synced' ? no('already in sync') : yes,
+      : !argo ? no('ArgoCD is unavailable right now') // its state is unknown: don't offer a blind sync
+        : argo.sync_status === 'Synced' ? no('already in sync') : yes,
   };
 
   if (ctx.stress) {

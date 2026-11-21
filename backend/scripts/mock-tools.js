@@ -108,8 +108,11 @@ export function startMockTools(port = 0) {
   });
   k.get('/api/v1/namespaces/:ns(frontend-stg|frontend-prod)/events', (req, res) => res.json({ items: [
     { involvedObject: { kind: 'HorizontalPodAutoscaler', name: 'frontend-hpa' }, reason: 'SuccessfulRescale', message: 'New size: 3; reason: cpu resource utilization (percentage of request) above target', type: 'Normal', lastTimestamp: new Date(Date.now() - 60000).toISOString() },
-    { involvedObject: { kind: 'Pod', name: 'frontend-7d9f-c' }, reason: 'Pulling', message: 'Pulling image "registry/frontend:stg-abc1234"', type: 'Normal', lastTimestamp: new Date(Date.now() - 30000).toISOString() },
+    { involvedObject: { kind: 'Pod', name: 'frontend-7d9f8c6b5-x2k4c' }, reason: 'Pulling', message: 'Pulling image "registry/frontend:stg-abc1234"', type: 'Normal', lastTimestamp: new Date(Date.now() - 30000).toISOString() },
     { involvedObject: { kind: 'Pod', name: 'other-app-1' }, reason: 'BackOff', message: 'should be filtered out', type: 'Warning', lastTimestamp: new Date().toISOString() },
+    // a database next to the "catalog" Deployment: same prefix, must not show up as catalog events
+    { involvedObject: { kind: 'Pod', name: 'catalog-db-0' }, reason: 'BackOff', message: 'should be filtered out (database pod)', type: 'Warning', lastTimestamp: new Date().toISOString() },
+    { involvedObject: { kind: 'StatefulSet', name: 'catalog-db' }, reason: 'SuccessfulCreate', message: 'should be filtered out (database set)', type: 'Normal', lastTimestamp: new Date().toISOString() },
     { involvedObject: { kind: 'HorizontalPodAutoscaler', name: 'cart-hpa' }, reason: 'SuccessfulRescale', message: 'New size: 2; reason: cpu resource utilization (percentage of request) above target', type: 'Normal', lastTimestamp: new Date(Date.now() - 90000).toISOString() },
   ] }));
   k.get('/apis/autoscaling/v2/namespaces/:ns(frontend-stg|frontend-prod)/horizontalpodautoscalers', (req, res) => res.json({ items: [{

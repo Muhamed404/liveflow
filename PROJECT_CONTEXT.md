@@ -1,7 +1,7 @@
 # Liveflow — Project Context (handoff)
 
 > Upload this file (and the repo zip) at the start of a new chat. It contains everything decided and built so far.
-> Last updated: 2026-11-18 · version **0.5.4**
+> Last updated: 2026-11-21 · version **0.5.5**
 
 ---
 
@@ -246,5 +246,6 @@ Then: Settings → Clusters & integrations → add + Test → Apps & environment
 | 0.4.0 | Frontend Flow page, demo mode |
 | 0.5.0 | Runs/Releases/Stress/Settings pages, auth + roles, TLS/tenant/metric-label/CSRF hardening, Docker image |
 | 0.5.1–0.5.2 | Settings errors say "Couldn’t save", name the field and mark it (zod + rule errors share `{path, message}`); metric fields trimmed |
+| 0.5.5 | Logic review: scaled-to-0 shown as a failure (was "done"), Sync refused while Jenkins runs (API, not only the button), rollback prod-only, can.sync off when ArgoCD is unavailable, prod cannot be auto, pod/event matching ignores same-prefix databases, service-aware rolling headline, cache no longer re-stores a stale answer after invalidate. UI: labelled App switcher showing names; demo app renamed Retail Store. Docs: user guide in `docs/`, README rewritten. Tests: `scripts/logic-test.js` (backend 186 checks, frontend 27 tests) |
 | 0.5.4 | Several deployments per environment: workload returns `services[]` + totals (version/image/HPA from the first); Services panel, pods grouped per service, HPA events name the service, PromQL `pod=~"(a|b)-.*"`, connection test checks each |
 | 0.5.3 | Renamed Showcase → Liveflow (UI via `frontend/src/lib/brand.js`, docs, packages, image, volume `liveflow-data`, cookie `lf_session`, localStorage `liveflow.user`) |

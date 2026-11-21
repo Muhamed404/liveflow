@@ -38,25 +38,25 @@ for (const [id, type, url, username, token] of [
   ['argocd-main', 'argocd', `${M}/argocd`, null, 'argocd-main-token'], ['prom-stg', 'prometheus', `${M}/prom-stg`, null, null],
   ['prom-dev', 'prometheus', `${M}/prom-dev`, null, null], ['loki-main', 'loki', `${M}/loki`, null, null],
 ]) await api('POST', '/integrations', { id, type, name: id, base_url: url, username, token });
-await api('POST', '/apps', { id: 'frontend-app', name: 'Frontend', github_integration_id: 'github-main', github_repo: 'myorg/frontend-app' });
+await api('POST', '/apps', { id: 'retail-store', name: 'Retail Store', github_integration_id: 'github-main', github_repo: 'myorg/frontend-app' });
 const common = { cluster_id: 'cluster-stg', namespace: 'frontend-stg', deployment: 'frontend, catalog, cart, orders, checkout', jenkins_integration_id: 'jenkins-main',
   argocd_integration_id: 'argocd-main', argocd_app: 'frontend-staging', prometheus_integration_id: 'prom-stg', loki_integration_id: 'loki-main' };
-await api('PUT', '/apps/frontend-app/environments/dev', { runtime: 'compose', compose_project: 'frontend', prometheus_integration_id: 'prom-dev', loki_integration_id: 'loki-main', jenkins_integration_id: 'jenkins-main', jenkins_job: 'frontend-staging-ci', git_branch: 'dev' });
-await api('PUT', '/apps/frontend-app/environments/staging', { runtime: 'k8s', ...common, git_branch: 'staging', jenkins_job: 'frontend-staging-ci', stress_job: 'k6-stress', stress_target_url: 'http://frontend.frontend-stg.svc/' });
-await api('PUT', '/apps/frontend-app/environments/prod', { runtime: 'k8s', ...common, namespace: 'frontend-prod', argocd_app: 'frontend-prod', git_branch: 'main', jenkins_job: 'frontend-prod' });
+await api('PUT', '/apps/retail-store/environments/dev', { runtime: 'compose', compose_project: 'frontend', prometheus_integration_id: 'prom-dev', loki_integration_id: 'loki-main', jenkins_integration_id: 'jenkins-main', jenkins_job: 'frontend-staging-ci', git_branch: 'dev' });
+await api('PUT', '/apps/retail-store/environments/staging', { runtime: 'k8s', ...common, git_branch: 'staging', jenkins_job: 'frontend-staging-ci', stress_job: 'k6-stress', stress_target_url: 'http://frontend.frontend-stg.svc/' });
+await api('PUT', '/apps/retail-store/environments/prod', { runtime: 'k8s', ...common, namespace: 'frontend-prod', argocd_app: 'frontend-prod', git_branch: 'main', jenkins_job: 'frontend-prod' });
 
 mock.state.allReady = true;
 mock.state.realistic = true;
 mock.state.argoApps = { 'frontend-staging': { sync: 'Synced', manual: false }, 'frontend-prod': { sync: 'OutOfSync', manual: true } };
 // prod: a release built and waiting at the gate (Sync in the UI opens it; it re-closes on the next loop)
-await api('POST', '/apps/frontend-app/environments/prod/releases', { version: 'v2.2.0', confirm: true }, 'mohamed');
+await api('POST', '/apps/retail-store/environments/prod/releases', { version: 'v2.2.0', confirm: true }, 'mohamed');
 mock.state.finish('frontend-prod');
 
 // staging: build -> rolling update -> live, every 45s
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 (async function loop() {
   for (;;) {
-    await api('POST', '/apps/frontend-app/environments/staging/builds', {}, 'mohamed');
+    await api('POST', '/apps/retail-store/environments/staging/builds', {}, 'mohamed');
     await sleep(15000);
     mock.state.finish('frontend-staging-ci'); mock.state.rolling = true; invalidate('');
     await sleep(10000);

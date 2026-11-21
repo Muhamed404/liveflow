@@ -94,5 +94,7 @@ export function checkEnvRules(row) {
   if (row.stress_job && !row.stress_target_url) need('stress_target_url', 'required when a k6 job is set');
   if (row.stress_job && !row.jenkins_integration_id) need('jenkins_integration_id', 'the k6 job runs on Jenkins: pick one');
   if (row.jenkins_integration_id && !row.jenkins_job) need('jenkins_job', 'required when Jenkins is set');
+  // the one promise of the dashboard: production never changes by itself
+  if (row.name === 'prod' && row.deploy_mode === 'auto') need('deploy_mode', 'prod is always manual: someone opens the gate to sync');
   return issues;
 }

@@ -16,6 +16,19 @@ const imageTag = (image = '') => {
   return at > image.lastIndexOf('/') ? image.slice(at + 1) : 'latest';
 };
 
+// Is this event about one of the Deployments, its ReplicaSets or its pods? Matched by kind + exact name shape,
+// so the "catalog" Deployment does not pick up events of catalog-db (StatefulSet) or catalog-db-0 (its pod).
+const RS = '[a-z0-9]{1,10}', POD = '[a-z0-9]{5}';
+function ownedBy(obj, deployments) {
+  const n = obj?.name || '';
+  return deployments.some((d) => {
+    if (obj?.kind === 'Deployment') return n === d;
+    if (obj?.kind === 'ReplicaSet') return new RegExp(`^${d}-${RS}$`).test(n);
+    if (obj?.kind === 'Pod') return new RegExp(`^${d}-${RS}-${POD}$`).test(n);
+    return false;
+  });
+}
+
 function summarizePod(p) {
   const statuses = p.status?.containerStatuses || [];
   const waiting = statuses.find((s) => s.state?.waiting)?.state.waiting.reason;
@@ -77,10 +90,7 @@ export const k8s = {
     const deps = [].concat(deployments), hpas = [].concat(hpaNames).filter(Boolean);
     const { data } = await call(cluster, `/api/v1/namespaces/${namespace}/events?limit=300`);
     return (data.items || [])
-      .filter((e) => {
-        const n = e.involvedObject?.name || '';
-        return deps.some((d) => n === d || n.startsWith(`${d}-`)) || hpas.includes(n);
-      })
+      .filter((e) => ownedBy(e.involvedObject, deps) || hpas.includes(e.involvedObject?.name))
       .map((e) => ({
         at: e.lastTimestamp || e.eventTime || e.firstTimestamp || e.metadata?.creationTimestamp,
         kind: e.involvedObject?.kind,

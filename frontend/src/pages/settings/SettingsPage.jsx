@@ -26,7 +26,7 @@ function AddApp({ integrations, onCreated }) {
   const create = useApiMutation((body) => api('/apps', { method: 'POST', body }), [['apps']]);
   return (
     <form className="addapp" onSubmit={(e) => { e.preventDefault(); create.mutate({ id: slug(f.name), name: f.name, github_integration_id: f.github_integration_id, github_repo: f.github_repo || null }, { onSuccess: (a) => { setF({ name: '', github_integration_id: null, github_repo: '' }); onCreated(a.id); } }); }}>
-      <Text id="new-app" label="New app" value={f.name} onChange={(v) => setF({ ...f, name: v })} placeholder="frontend-app" hint={f.name ? `id: ${slug(f.name)}` : null} />
+      <Text id="new-app" label="New app" value={f.name} onChange={(v) => setF({ ...f, name: v })} placeholder="Retail Store" hint={f.name ? `id: ${slug(f.name)}` : null} />
       <Pick id="new-app-gh" label="GitHub" value={f.github_integration_id} onChange={(v) => setF({ ...f, github_integration_id: v })} options={integrations.filter((i) => i.type === 'github').map((i) => ({ value: i.id, label: i.name }))} />
       <Text id="new-app-repo" label="Repository" mono value={f.github_repo} onChange={(v) => setF({ ...f, github_repo: v })} placeholder="owner/repo" />
       {create.isError && <p className="hint tone-bad" role="alert">{create.error.message}</p>}

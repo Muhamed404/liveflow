@@ -78,15 +78,22 @@ export function Shell({ apps, appId, env, page, chips, children }) {
 
       {!settings && app && (
         <div className="contextbar">
-          <label htmlFor="app-select" className="sr-only">App</label>
-          <select id="app-select" className="select mono" value={appId}
-            onChange={(e) => {
-              const next = apps.find((a) => a.id === e.target.value);
-              const nextEnv = next.environments.find((x) => x.name === env)?.name || next.environments[0]?.name;
-              navigate(nextEnv ? `/${next.id}/${nextEnv}` : '/settings');
-            }}>
-            {apps.map((a) => <option key={a.id} value={a.id}>{a.id}</option>)}
-          </select>
+          {/* the App is the whole product (e.g. Retail Store); its services are listed inside each environment */}
+          <div className="appswitch">
+            <label htmlFor="app-select" className="appswitch__label">App</label>
+            {apps.length > 1 ? (
+              <select id="app-select" className="select" value={appId} title={`id: ${appId}`}
+                onChange={(e) => {
+                  const next = apps.find((a) => a.id === e.target.value);
+                  const nextEnv = next.environments.find((x) => x.name === env)?.name || next.environments[0]?.name;
+                  navigate(nextEnv ? `/${next.id}/${nextEnv}` : '/settings');
+                }}>
+                {apps.map((a) => <option key={a.id} value={a.id}>{a.name || a.id}</option>)}
+              </select>
+            ) : (
+              <span id="app-select" className="appswitch__name" title={`id: ${appId}`}>{app.name || app.id}</span>
+            )}
+          </div>
           <div role="group" aria-label="Environment" className="envtabs">
             {ENVS.filter((e) => envs.includes(e)).map((e) => (
               <NavLink key={e} to={`/${appId}/${e}${page && page !== 'flow' ? `/${page}` : ''}`} className={`envtab envtab--${e}`}

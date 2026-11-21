@@ -1,242 +1,69 @@
 # Liveflow
 
-> Starting a new chat? Give it **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** — the full handoff.
->
-> Infra side: everything Jenkins, ArgoCD, K8s, Prometheus, Loki and Grafana must provide is in **[REQUIREMENTS.md](REQUIREMENTS.md)** (kept up to date with a changelog).
+**One screen for your whole delivery path.** See what Jenkins is building, what ArgoCD will deploy and what runs in each environment — and open the production gate when you are ready.
 
-## Quick start (no infra needed)
+![The Flow page](docs/images/flow-page.png)
+
+- **Watch:** GitHub → Jenkins → ArgoCD → Kubernetes (or Docker Compose) as one live path, with pods per service, metrics, logs and one timeline of who did what.
+- **Act:** run pipelines, create versioned releases, roll back, run k6 load tests.
+- **Stay safe:** production never changes by itself — someone types `prod` and presses **Sync**. Roles, confirmations and an activity log on every action.
+
+> Version **0.5.5** · Node 20 · one Docker image (API + dashboard) · SQLite
+
+## Try it in two minutes (no tools needed)
 
 ```bash
-# terminal 1 — API + mock tools that move on their own (fresh DB each start)
-cd backend && npm install && npm run demo                 # auth off
-cd backend && npm install && AUTH_MODE=local npm run demo # with sign-in
-#   admin / demo-admin-123 · sara / sara-demo-123 (operator) · ahmed / ahmed-demo-123 (viewer)
-
-# terminal 2 — the dashboard
-cd frontend && npm install && npm run dev                 # http://localhost:5173
+cd backend && npm install && AUTH_MODE=local npm run demo   # API + fake tools that move by themselves
+cd frontend && npm install && npm run dev                  # http://localhost:5173
 ```
+
+Sign in as `admin / demo-admin-123` · `sara / sara-demo-123` (operator) · `ahmed / ahmed-demo-123` (viewer).
 
 ## Run it for real
 
 ```bash
-cp backend/.env.example .env          # set ENCRYPTION_KEY and ADMIN_PASSWORD
-docker compose up -d --build          # http://<host>:4000
+cp backend/.env.example .env      # set ENCRYPTION_KEY (openssl rand -base64 32) and ADMIN_PASSWORD
+docker compose up -d --build      # http://<server>:4000
 ```
-One image serves the API and the dashboard (`Dockerfile`, `docker-compose.yml`). Data lives in the `/data` volume.
-Then sign in as admin → **Settings → Clusters & integrations** → add your tools → **Test** each one →
-**Apps & environments** → add the app and its dev / staging / prod → **Test environment**.
-Everything the tools must provide is in **[REQUIREMENTS.md](REQUIREMENTS.md)**.
 
-| Env var | Default | |
-|---|---|---|
-| `ENCRYPTION_KEY` | — | **required**, `openssl rand -base64 32`. Encrypts every token |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / — | first admin, created on first start with an empty DB |
-| `AUTH_MODE` | `local` | `off` = no sign-in (demo only) |
-| `SESSION_HOURS` | `12` | |
-| `COOKIE_SECURE` | `false` | `true` when served over HTTPS |
-| `TRUST_PROXY` | — | `1` behind a load balancer / ingress |
-| `DB_PATH` | `/data/config.db` | SQLite file |
-| `STATIC_DIR` | `/app/public` in the image | built frontend |
+Then follow **[First setup, step by step](docs/03-first-setup.md)**.
 
-### Roles
+## Guide
+
+| | |
+|---|---|
+| [How Liveflow works](docs/01-how-liveflow-works.md) | the idea, the words it uses, the safety rules |
+| [Install and run](docs/02-install.md) | server, `.env`, HTTPS, users, upgrade, backup |
+| [First setup, step by step](docs/03-first-setup.md) | from an empty Liveflow to a green delivery path |
+| [Connect each tool](docs/04-integrations.md) | exact token, permission and URL for GitHub, Jenkins, ArgoCD, Kubernetes, Prometheus, Loki, Grafana |
+| [Environments](docs/05-environments.md) | every field, several services per environment, the rules |
+| [Using it every day](docs/06-daily-use.md) | deploy, release, the gate, rollback, stress tests |
+| [What your Jenkinsfiles must do](docs/07-jenkins-contract.md) | parameters, stages, image tags |
+| [Troubleshooting](docs/08-troubleshooting.md) | every common error and its fix |
+| [Full example: retail-store](docs/09-example-retail-store.md) | a complete real configuration |
+| [API reference](docs/api-reference.md) | for people who build on the API |
+
+Infrastructure checklist: **[REQUIREMENTS.md](REQUIREMENTS.md)** · Full project handoff: **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)**
+
+## Roles
+
 | Role | Can |
 |---|---|
 | viewer | watch everything |
-| operator | run pipelines, releases, rollbacks, sync, stress tests, connection tests |
+| operator | run pipelines, releases, rollbacks, Sync, stress tests, connection tests |
 | admin | all of that + settings + users |
 
-More users: Settings → Users, or `npm run user:create -- <username> <role>`.
-
 ## Tests
-```bash
-cd backend && npm test        # 162 checks: API, adapters, actions, UI shapes, auth, TLS / CSRF / tenant quirks
-cd frontend && npm test       # 17 UI tests against fixtures captured from the real API
-python frontend/e2e/flows.py  # 14-step browser walkthrough against the demo (see the file header)
-```
-
-## Phase 4a — Frontend: Flow page (done)
-
-`frontend/` — Vite + React 18 + React Query, IBM Plex Sans / Mono (self-hosted via @fontsource).
-
-- **Delivery path** drawn straight from `overview.path`: stations, rails, Jenkins stages from your Jenkinsfile, pod squares for rolling updates. Vertical on phones.
-- **Prod gate**: type the env name, then **Sync** (`POST /sync` with `confirm: true`).
-- **Run pipeline** on dev / staging, disabled with the backend's reason while a run is going.
-- Stats, signals chart with deploy / stress markers (only metrics the env really has), "What just happened" timeline, Loki logs with filter + level.
-- Name prompt on first visit (sent as `x-user` until auth), "N watching" from presence.
-- Polling: overview 3s, timeline/logs 5s, charts 10s — the backend cache keeps this cheap.
 
 ```bash
-cd frontend && npm test        # 13 UI tests against fixtures captured from the real API
+cd backend && npm test     # 186 checks: logic, API, adapters, actions, UI shapes, auth, TLS / CSRF / tenant quirks
+cd frontend && npm test    # 27 UI tests against fixtures captured from the real API
 ```
 
-## Phase 1 — Backend core (done)
-
-```bash
-cd backend
-cp .env.example .env
-# put a key in ENCRYPTION_KEY:  openssl rand -base64 32
-npm install
-npm test        # smoke + adapter tests (uses mock tools, no real infra needed)
-npm run dev     # http://localhost:4000/api/health
-```
-
-### Data model
-| Table          | What it holds |
-|----------------|---------------|
-| `clusters`     | K8s API URL + ServiceAccount token (encrypted) |
-| `integrations` | Shared tools: jenkins, github, argocd, prometheus, grafana, loki, docker |
-| `apps`         | App + its GitHub repo |
-| `environments` | One row per app+env: runtime (compose/k8s), cluster, namespace, jenkins job, argocd app, selectors |
-
-Replicas are **not** stored — they're read live from the cluster / HPA.
-Tokens are AES-256-GCM encrypted and never returned by the API (`has_token: true` only).
-
-### API
-```
-GET|POST        /api/clusters            GET|PUT|DELETE /api/clusters/:id
-GET|POST        /api/integrations?type=  GET|PUT|DELETE /api/integrations/:id
-GET|POST        /api/apps                GET|PUT|DELETE /api/apps/:appId
-GET             /api/apps/:appId/environments
-GET|PUT|DELETE  /api/apps/:appId/environments/:env   (PUT = create or update)
-```
-
-### Example
-```bash
-curl -X POST localhost:4000/api/clusters -H 'content-type: application/json' \
-  -d '{"id":"cluster-stg","name":"Staging","api_url":"https://k8s-stg:6443","token":"<SA token>"}'
-
-curl -X POST localhost:4000/api/integrations -H 'content-type: application/json' \
-  -d '{"id":"jenkins-main","type":"jenkins","name":"Jenkins","base_url":"http://jenkins:8080","username":"admin","token":"<api token>"}'
-
-curl -X POST localhost:4000/api/apps -H 'content-type: application/json' \
-  -d '{"id":"frontend-app","name":"Frontend"}'
-
-curl -X PUT localhost:4000/api/apps/frontend-app/environments/staging -H 'content-type: application/json' \
-  -d '{"runtime":"k8s","cluster_id":"cluster-stg","namespace":"frontend-stg","deployment":"frontend",
-       "jenkins_integration_id":"jenkins-main","jenkins_job":"frontend-stg"}'
-```
-
-## Phase 2 — Adapters (done)
-
-`src/adapters/` — one file per tool, all built on `http.js` (timeouts, TLS/CA for k8s, clean errors).
-
-| Adapter      | Main functions |
-|--------------|----------------|
-| `jenkins`    | triggerBuild, resolveQueue, getBuild (+stages via Pipeline Stage View), listBuilds, getLog |
-| `k8s`        | getDeployment (live replicas), listPods, getHpa |
-| `argocd`     | getApp (sync/health/history), sync (manual prod deploy) |
-| `github`     | listReleases, tagExists, createRelease |
-| `prometheus` | query, scalar, range — PromQL built in `queries.js` |
-| `loki`       | recent (newest first, level detection) |
-| `grafana`    | testDashboard, embedUrl |
-
-### Connection tests (Settings → "Test connections")
-```
-POST /api/clusters/:id/test
-POST /api/integrations/:id/test
-POST /api/apps/:appId/environments/:env/test   # checks the exact job / deployment / argocd app / metrics
-```
-
-### Dev env = Docker Compose + cAdvisor
-The dashboard never talks to Docker. Dev containers are read from Prometheus:
-`container_last_seen{container_label_com_docker_compose_project="<compose_project>"}`.
-Requirements on the dev server: cAdvisor running, scraped by the Prometheus set in `prometheus_integration_id`.
-
-### Target app requirements
-- Expose `http_requests_total` (with a `status` label) for RPS / error-rate panels.
-- K8s CPU/memory come from kubelet cAdvisor — no app changes needed.
-- Grafana: `allow_embedding = true` for the iframe.
-
-## Phase 3 — Action APIs (done)
-
-All under `/api/apps/:appId/environments/:env`
-
-| Method | Path | What it does |
-|--------|------|--------------|
-| GET  | `/overview` | workload + metrics + last pipeline + ArgoCD in one call. Each section is `{data}` or `{error}` |
-| GET  | `/workload` | pods (k8s) or containers (compose via cAdvisor), live replicas, HPA |
-| GET  | `/metrics` | cpu_cores, memory_bytes, rps, error_rate |
-| GET  | `/metrics/:metric?minutes=15` | time series for charts |
-| GET  | `/logs?limit=&minutes=&contains=` | Loki, newest first |
-| GET/POST | `/builds` | list / trigger dev & staging pipeline |
-| GET  | `/builds/:n`, `/builds/:n/log?start=` | stages + progressive console log |
-| GET  | `/queue/:id` | queue item → build number |
-| GET/POST | `/releases` | **prod only**: GitHub tag + Jenkins `VERSION`, `ACTION=release` |
-| POST | `/rollback` | redeploy existing tag: Jenkins `VERSION`, `ACTION=rollback` |
-| POST | `/sync` | ArgoCD sync — the manual prod gate |
-| GET/POST/DELETE | `/stress` | status / start / stop the k6 job |
-| GET  | `/activity` | who did what on this env (also `GET /api/activity` for all) |
-
-### Safety rules
-- **Prod** release / rollback / sync / stress need `"confirm": true` → otherwise `428`.
-- Only **one pipeline** and **one stress test** at a time per env → `409` for the second interviewer.
-- Release version must be `vX.Y.Z`, **newer than the latest tag**, and not already exist.
-- The running-pipeline check happens **before** tagging, so a blocked release never leaves a stray tag.
-- Every action is written to `activity` (ok / failed + actor from `x-user` header until auth lands).
-- Reads are cached 2–5s with in-flight de-dup: 5 interviewers polling = 1 call to the cluster.
-
-### Jenkins contract (your Jenkinsfiles must accept these)
-| Job | Parameters sent by the dashboard |
-|-----|-----|
-| prod job (`jenkins_job` of prod) | `VERSION` (e.g. `v2.2.0`), `ACTION` (`release` \| `rollback` — skip the image build on rollback) |
-| dev / staging job | none by default (any `UPPER_CASE` params passed through `POST /builds`) |
-| k6 job (`stress_job`) | `TARGET_URL`, `VUS`, `DURATION` (e.g. `30s`) |
-
-Prod Jenkins job should **not** have a GitHub tag webhook — the dashboard triggers it, otherwise it runs twice.
-
-## Phase 3.1 — Shaped for the "Live flow" UI (done)
-
-The backend now computes what the screens draw, so the React side only renders.
-
-### `GET /overview` additions
-```jsonc
-{
-  "path": {
-    "phase": "building | deploying | rolling_out | scaling | waiting_gate | failed | unhealthy | live | idle",
-    "stations": [
-      { "id": "github",  "state": "done", "status": "Changes picked up", "detail": "d41e0a7 → staging", "trigger": { "user": "Mohamed" } },
-      { "id": "jenkins", "state": "active", "status": "#49 running", "detail": "Build + push",
-        "stages": [{ "name": "Checkout", "state": "ok", "duration_ms": 10000 }, { "name": "Build + push", "state": "running" }],
-        "current_stage": "Build + push", "image": "registry/frontend:stg-d41e0a7", "duration_ms": 151000 },
-      { "id": "argocd",  "state": "idle", "status": "Waits for Jenkins", "sync_status": "Synced" },
-      { "id": "cluster", "state": "active", "status": "Rolling out 2 / 3", "rolling_out": true,
-        "instances": [{ "name": "frontend-58cd-a", "look": "new | old | starting | terminating | stopped" }] }
-    ],
-    "rails": ["active", "idle", "idle"]          // done | active | blocked | idle — one per gap
-  },
-  "gate": { "waiting": true, "from_version": "v2.1.0", "to_version": "v2.2.0", "target": "cluster-prod/frontend-prod", "pods": 5, "requires_confirm": true },
-  "can": { "run_pipeline": { "allowed": false, "reason": "#49 is running — one pipeline per environment" }, "release": {}, "sync": {}, "stress": {} },
-  "stress": { "data": { "running": true, "vus": 50, "duration_sec": 120, "remaining_sec": 72, "started_by": "sara", "limits": {} } }
-}
-```
-- Stations: k8s = `github → jenkins → argocd → cluster`, compose = `github → jenkins → dev_server`. Every one is backed by a real API — no inferred stations.
-- **Jenkins stages come from your Jenkinsfile** (`wfapi/describe`, needs the *Pipeline Stage View* plugin), normalized to `ok | running | failed | pending`.
-- Station `state`: `done | active | gate | fail | idle | unknown`. A station downstream of a running build is `idle` ("Waits for Jenkins") but keeps its real status in `sync_status`.
-- Pods: `current` = runs the deployment's desired image → `look: new | old` for the rolling-update squares.
-
-### New / changed endpoints
-| Method | Path | For |
-|---|---|---|
-| GET  | `/events?limit=40` | "What just happened": user actions + Jenkins runs + ArgoCD history + k8s & HPA events, newest first. A failing source lands in `sources_failed`, not an error |
-| GET  | `/metrics/:metric` | now also returns `markers` (deploys, stress starts) inside the window |
-| GET  | `/releases` | **shape changed** → `{ live_version, pending_version, latest_tag, suggested_next, releases: [{ tag, state: live\|waiting\|building\|previous, can_rollback }] }` |
-| GET  | `/stress` | adds `vus, duration_sec, elapsed_sec, remaining_sec, started_by, target_url, limits` |
-| POST | `/api/presence` | heartbeat `{ app, env, page }` (user from `x-user`), returns who's watching — 30s TTL |
-| GET  | `/api/presence?app=&env=` | "3 watching" |
-
-### Jenkins contract (optional addition)
-Set `currentBuild.description = "image=registry/frontend:${TAG}"` in the Jenkinsfile → the Jenkins station shows "pushed <tag>" and the gate knows the target version on non-prod envs.
-
-## Phase 4b / 4c / 5 — Pages, settings, auth (done)
-- **Runs**: run list, stages of the selected run drawn as a path, live Jenkins console (progressive, follow toggle).
-- **Releases** (prod): versions with live / waiting / building / previous, new release with suggested version, rollback; prod actions need the env name typed.
-- **Stress**: k6 → Service → Pods → HPA path, sliders inside the backend limits, stop button, CPU chart with stress markers, HPA events.
-- **Settings**: apps and their environments (runtime, cluster, Jenkins job, ArgoCD app, selectors, k6), clusters and integrations with **Test** per row, users.
-- **Auth**: users + roles, scrypt passwords, HttpOnly SameSite=Strict session cookie, sign-in throttling, JSON-only mutations.
-- **Integration hardening**: TLS options (CA / skip verify) on every tool, Jenkins CSRF crumb fallback, `X-Scope-OrgID` tenant for Loki / Mimir, configurable request metric + status label, tool error messages shown as-is.
+Browser walkthrough against the demo: `python frontend/e2e/flows.py` (see the file header).
 
 ## Next
+
+- First run against the real retail-store infrastructure: compare with [REQUIREMENTS.md](REQUIREMENTS.md) and fix whatever differs
 - Deploy to AWS (single container + volume; the image is ready)
-- First run against real infra: compare with REQUIREMENTS.md and fix whatever differs
-4. React frontend
-5. Auth + multi-user sessions
+

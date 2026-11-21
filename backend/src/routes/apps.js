@@ -17,8 +17,8 @@ function assertGithub(id) {
   if (!i || i.type !== 'github') throw new HttpError(400, `github_integration_id "${id}" is not a github integration`);
 }
 
-function validateEnvRow(row) {
-  const issues = checkEnvRules(row);
+function validateEnvRow(row, name) {
+  const issues = checkEnvRules({ ...row, name });
   if (issues.length) throw new HttpError(400, 'Invalid environment', issues);
   assertIntegrationTypes(row);
 }
@@ -74,11 +74,11 @@ appsRouter.put('/:appId/environments/:env', (req, res) => {
   const existing = environmentsRepo.get(appId, name);
   if (existing) {
     const patch = envBody.partial().parse(req.body);
-    validateEnvRow({ ...existing, ...patch });
+    validateEnvRow({ ...existing, ...patch }, name);
     return res.json(environmentsRepo.update(appId, name, patch));
   }
   const body = envBody.parse(req.body);
-  validateEnvRow(body);
+  validateEnvRow(body, name);
   res.status(201).json(environmentsRepo.create(appId, name, body));
 });
 

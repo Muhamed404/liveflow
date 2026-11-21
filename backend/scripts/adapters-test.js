@@ -71,6 +71,12 @@ expect('dev env: cAdvisor containers visible', r.body.ok && r.body.checks.find((
 
 // ---- adapters directly ----
 const stg = resolveContext('frontend-app', 'staging');
+{
+  // events: a same-prefix database (catalog-db StatefulSet / catalog-db-0 pod) must not count as the catalog Deployment's
+  const evs = await A.k8s.listEvents(stg.k8s.cluster, stg.k8s.namespace, ['frontend', 'catalog'], ['frontend-hpa']);
+  expect('k8s events keep the Deployment pod', evs.some((e) => e.object === 'frontend-7d9f8c6b5-x2k4c'), evs);
+  expect('k8s events skip a same-prefix database', !evs.some((e) => e.object.startsWith('catalog-db')), evs.map((e) => e.object));
+}
 const dev = resolveContext('frontend-app', 'dev');
 
 const dep = await A.k8s.getDeployment(stg.k8s.cluster, 'frontend-stg', 'frontend');
@@ -99,7 +105,13 @@ const rel = await A.github.createRelease(stg.github, 'myorg/frontend-app', { tag
 expect('github create release', rel.tag === 'v2.2.0', rel);
 
 const qs = buildQueries(stg), qd = buildQueries(dev);
-expect('k8s queries use namespace + pod regex', qs.cpu_cores.includes('namespace="frontend-stg",pod=~"frontend-.*"') && qs.rps.includes('app="frontend"'));
+expect('k8s queries use namespace + pod regex', qs.cpu_cores.includes('namespace="frontend-stg",pod=~"frontend-[a-z0-9]{1,10}-[a-z0-9]{5}"') && qs.rps.includes('app="frontend"'));
+{
+  // the pod regex must take the Deployment's pods and leave a same-prefix database alone (PromQL regexes are fully anchored)
+  const re = new RegExp(`^${/pod=~"([^"]+)"/.exec(qs.cpu_cores)[1]}$`);
+  expect('pod regex matches a Deployment pod', re.test('frontend-7d9f8c6b5-x2k4q'));
+  expect('pod regex skips a database pod with the same prefix', !re.test('frontend-db-0') && !re.test('frontend-redis-0'));
+}
 expect('dev queries use compose label', qd.cpu_cores.includes('container_label_com_docker_compose_project="frontend"') && qd.containers);
 expect('prom scalar', (await A.prometheus.scalar(stg.prometheus, qs.cpu_cores)) === 0.42);
 const rng = await A.prometheus.range(stg.prometheus, qs.cpu_cores);
